@@ -2,6 +2,10 @@
 
 ## This is a bot application that runs and update the scorecard of given match in the dynamo db table.
 
+### Prerequisites
+- #### Clone this repo in local system
+- ####  Install Python and create a python virtual ENV in the project dir
+
 ### How To Run the Bot?
 - #### Open terminal
 - ####  Activate python and navigate to the project directory
