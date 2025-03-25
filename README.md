@@ -5,6 +5,7 @@
 ### Prerequisites
 - #### Clone this repo in local system
 - ####  Install Python and create a python virtual ENV in the project dir
+- #### Install python requirements by running ``pip install -r requirements.txt``
 
 ### How To Run the Bot?
 - #### Open terminal
