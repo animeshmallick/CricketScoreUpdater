@@ -86,7 +86,7 @@ class Common:
 
     def get_payload_data(self, series, match, over_id, teams, innings, over, match_status, additional_details,
                          team1_score, team2_score, batsmen, bowler, partnership, last_batsman, last_wicket_at,
-                         this_over, themes):
+                         this_over):
         return {'id': series + "&&" + match + "&&" + str(over_id),
                 'source': "score_bot",
                 'series_id': series, 'match_id': match, 'over_id': over_id,
@@ -98,8 +98,7 @@ class Common:
                 'batsmen': batsmen, 'bowler': bowler,
                 'this_over': this_over, 'partnership': partnership,
                 'last_batsman' : last_batsman,
-                'last_wicket_at': last_wicket_at,
-                'themes': themes}
+                'last_wicket_at': last_wicket_at}
 
     def save_score_to_db(self, payload):
             return requests.put(self.lambda_db_put_request_url, json=payload)

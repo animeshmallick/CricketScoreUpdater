@@ -17,7 +17,6 @@ if not args.match or len(args.match) == 0:
 
 series= args.series
 match = args.match
-themes = ['rgba(237, 207, 8, 0.63)', '#2b5df3']
 
 driver = None
 attempt = 1
@@ -33,10 +32,6 @@ while True:
         team1_runs, team1_wickets, team1_over = common.get_score_from_page(teams[0])
         team2_runs, team2_wickets, team2_over = common.get_score_from_page(teams[1])
         innings = 1 if team2_over is None else 2
-        if innings == 1:
-            themes.append(themes[0])
-        else:
-            themes.append(themes[1])
         over = team1_over if innings == 1 else team2_over
         match_status = "Not Yet Started" if team1_over is None else "live"
         match_additional_details = common.get_match_additional_details()
@@ -97,7 +92,7 @@ while True:
 
         payload = common.get_payload_data(series, match, innings * 100 + math.ceil(over), teams, innings, over, match_status,
                                          match_additional_details, team1_score, team2_score, batsmen, bowler,
-                                         partnership, last_batsman, last_wicket_at, last_over, themes)
+                                         partnership, last_batsman, last_wicket_at, last_over)
         response = common.save_score_to_db(payload)
         print(response)
         print(payload)
