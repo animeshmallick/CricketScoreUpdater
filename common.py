@@ -172,9 +172,9 @@ class Common:
         scorecard = {
             'id':  series + "&&" + match,
             'team1_batsmen': [player.to_dict() for player in team1_batsmen],
-            'team1_bowlers': [player.to_dict() for player in team1_bowlers],
+            'team2_bowlers': [player.to_dict() for player in team1_bowlers],
             'team2_batsmen': [player.to_dict() for player in team2_batsmen],
-            'team2_bowlers': [player.to_dict() for player in team2_bowlers]
+            'team1_bowlers': [player.to_dict() for player in team2_bowlers]
         }
         return requests.put(self.lambda_db_detailed_scorecard_put_request_url, json=scorecard)
 
