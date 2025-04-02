@@ -1,10 +1,12 @@
+import json
 import time
 import re
-
 import requests
+
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
+from Player import Player
 
 
 class Common:
@@ -18,6 +20,7 @@ class Common:
         self.batsmen_xpath = "//th[text()='Batters']/ancestor::table//tbody[1]//tr[{}]//td"
         self.bowler_xpath = "//th[text()='Batters']/ancestor::table//tbody[2]//tr[{}]//td"
         self.lambda_db_put_request_url = "https://om8zdfeo2h.execute-api.ap-south-1.amazonaws.com/save_score"
+        self.lambda_db_detailed_scorecard_put_request_url = "https://ablminqly0.execute-api.ap-south-1.amazonaws.com/Prod/save_detailed_score"
 
     def open_cricket_score_page(self, series, match):
         if self.driver is None:
@@ -156,3 +159,37 @@ class Common:
         except Exception:
             pass
         time.sleep(1)
+
+    def open_detailed_scorecard(self, series, match):
+        self.driver.get(self.url.format(series, match, 'full-scorecard'))
+
+        team2_batsmen = self.get_player_details("//div[@class='ds-rounded-lg ds-mt-2'][2]//table[1]//tr[@class='']")
+        team2_bowlers = self.get_player_details("//div[@class='ds-rounded-lg ds-mt-2'][2]//table[2]//tbody//tr[@class='']")
+        team1_batsmen = self.get_player_details("//div[@class='ds-rounded-lg ds-mt-2'][1]//table[1]//tr[@class='']")
+        team1_bowlers = self.get_player_details("//div[@class='ds-rounded-lg ds-mt-2'][1]//table[2]//tbody//tr[@class='']")
+
+        scorecard = {
+            'id':  series + "&&" + match,
+            'team1_batsmen': [player.to_dict() for player in team1_batsmen],
+            'team1_bowlers': [player.to_dict() for player in team1_bowlers],
+            'team2_batsmen': [player.to_dict() for player in team2_batsmen],
+            'team2_bowlers': [player.to_dict() for player in team2_bowlers]
+        }
+        return requests.put(self.lambda_db_detailed_scorecard_put_request_url, json=scorecard)
+
+    def get_player_details(self, xpath):
+        players = []
+        for row in self.driver.find_elements(By.XPATH, xpath):
+            cols = row.find_elements(By.XPATH, "./td")
+            if len(cols) < 6:
+                break
+            player_details = ""
+            for col in cols:
+                text = col.text.strip().replace("\n", "")
+                player_details += text + "$$"
+            if 'total' in player_details.lower():
+                break
+            player = Player(player_details.strip())
+            players.append(player)
+        return players
+

@@ -1,7 +1,6 @@
 import sys
 import argparse
 import math
-import time
 
 from common import Common
 common = Common()
@@ -94,14 +93,14 @@ while True:
                                          match_additional_details, team1_score, team2_score, batsmen, bowler,
                                          partnership, last_batsman, last_wicket_at, last_over)
         response = common.save_score_to_db(payload)
-        print(response)
-        print(payload)
-        if response.status_code != 201:
-            raise Exception("Error in saving score to db")
-        print(payload)
+        print("Save Scorecard : " + ("Success" if response.status_code == 201 else "Failed"))
+
+        response = common.open_detailed_scorecard(series, match)
+        print("Save Detailed Scorecard : " + ("Success" if response.status_code == 201 else "Failed"))
+        print("=====================================================================\n")
     except Exception as e:
-        print(e)
+        print("Warning Issues")
+        print("=====================================================================\n")
         if driver is not None:
             driver.close()
-        time.sleep(5)
 
