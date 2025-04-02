@@ -99,7 +99,6 @@ while True:
         print("Save Detailed Scorecard : " + ("Success" if response.status_code == 201 else "Failed"))
         print("=====================================================================\n")
     except Exception as e:
-        print("Warning Issues")
         print("=====================================================================\n")
         if driver is not None:
             driver.close()

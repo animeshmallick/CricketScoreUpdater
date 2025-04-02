@@ -164,10 +164,10 @@ class Common:
     def open_detailed_scorecard(self, series, match):
         self.driver.get(self.url.format(series, match, 'full-scorecard'))
 
-        team2_batsmen = self.get_player_details("//div[@class='ds-rounded-lg ds-mt-2'][2]//table[1]//tr[@class='']")
-        team2_bowlers = self.get_player_details("//div[@class='ds-rounded-lg ds-mt-2'][2]//table[2]//tbody//tr[@class='']")
-        team1_batsmen = self.get_player_details("//div[@class='ds-rounded-lg ds-mt-2'][1]//table[1]//tr[@class='']")
-        team1_bowlers = self.get_player_details("//div[@class='ds-rounded-lg ds-mt-2'][1]//table[2]//tbody//tr[@class='']")
+        team2_batsmen = self.get_batsmen_player_details("//div[@class='ds-rounded-lg ds-mt-2'][2]//table[1]//tr[@class='']")
+        team2_bowlers = self.get_bowler_player_details("//div[@class='ds-rounded-lg ds-mt-2'][2]//table[2]//tbody//tr[@class='']")
+        team1_batsmen = self.get_batsmen_player_details("//div[@class='ds-rounded-lg ds-mt-2'][1]//table[1]//tr[@class='']")
+        team1_bowlers = self.get_bowler_player_details("//div[@class='ds-rounded-lg ds-mt-2'][1]//table[2]//tbody//tr[@class='']")
 
         scorecard = {
             'id':  series + "&&" + match,
@@ -178,7 +178,7 @@ class Common:
         }
         return requests.put(self.lambda_db_detailed_scorecard_put_request_url, json=scorecard)
 
-    def get_player_details(self, xpath):
+    def get_batsmen_player_details(self, xpath):
         players = []
         for row in self.driver.find_elements(By.XPATH, xpath):
             cols = row.find_elements(By.XPATH, "./td")
@@ -190,7 +190,19 @@ class Common:
                 player_details += text + "$$"
             if 'total' in player_details.lower():
                 break
-            player = Player(player_details.strip())
+            player = Player(player_details.strip(), isBatsman=True)
+            players.append(player)
+        return players
+
+    def get_bowler_player_details(self, xpath):
+        players = []
+        for row in self.driver.find_elements(By.XPATH, xpath):
+            cols = row.find_elements(By.XPATH, "./td")
+            player_details = ""
+            for col in cols:
+                text = col.text.strip().replace("\n", "")
+                player_details += text + "$$"
+            player = Player(player_details.strip(),  isBatsman=False)
             players.append(player)
         return players
 
