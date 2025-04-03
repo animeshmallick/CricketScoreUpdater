@@ -19,7 +19,7 @@ class Common:
         self.balls_details_from_over_xpath = "//div[@class='ds-border ds-border-line']//table//tr[{}]//td[{}]//div[contains(@class,'ds-mb-1.5')]//span"
         self.batsmen_xpath = "//th[text()='Batters']/ancestor::table//tbody[1]//tr[{}]//td"
         self.bowler_xpath = "//th[text()='Batters']/ancestor::table//tbody[2]//tr[{}]//td"
-        self.lambda_db_put_request_url = "https://om8zdfeo2h.execute-api.ap-south-1.amazonaws.com/save_score"
+        self.lambda_db_put_request_url = "https://ablminqly0.execute-api.ap-south-1.amazonaws.com/Prod/save_scorecard"
         self.lambda_db_detailed_scorecard_put_request_url = "https://ablminqly0.execute-api.ap-south-1.amazonaws.com/Prod/save_detailed_score"
 
     def open_cricket_score_page(self, series, match):
@@ -91,7 +91,7 @@ class Common:
     def get_payload_data(self, series, match, over_id, teams, innings, over, match_status, additional_details,
                          team1_score, team2_score, batsmen, bowler, partnership, last_batsman, last_wicket_at,
                          this_over):
-        return {'id': series + "&&" + match + "&&" + str(over_id),
+        return {'id': series + "&&" + match + "&&" + 'secondary',
                 'source': "score_bot",
                 'series_id': series, 'match_id': match, 'over_id': over_id,
                 'teams': teams, "is_live": match_status != 'completed',
@@ -103,6 +103,33 @@ class Common:
                 'this_over': this_over, 'partnership': partnership,
                 'last_batsman' : last_batsman,
                 'last_wicket_at': last_wicket_at}
+
+    def get_primary_payload_data(self, series, match, innings, teams, over, match_status, additional_details,
+                         team1_score, team2_score):
+        return {'id': series + "&&" + match + "&&" + 'primary',
+                'source': "score_bot",
+                'teams': teams,
+                "is_live": match_status == 'live',
+                'innings': innings,
+                'over': over,
+                'match_details': match_status, 'match_additional_details': additional_details,
+                'team1_score': team1_score,
+                'team2_score': team2_score,
+            }
+
+    def get_secondary_payload_data(self, series, match, partnership, last_batsman, last_wicket_at, last_over, bowler, batsmen1, batsmen2):
+        return {'id': series + "&&" + match + "&&" + 'secondary',
+                'source': "score_bot",
+                'partnership': partnership,
+                'last_batsman': last_batsman,
+                'last_wicket_at': last_wicket_at,
+                'this_over': last_over,
+                'bowler': bowler,
+                "batsmen": {
+                    "batsman1": batsmen1,
+                    "batsman2": batsmen2
+                }
+            }
 
     def save_score_to_db(self, payload):
             return requests.put(self.lambda_db_put_request_url, json=payload)
