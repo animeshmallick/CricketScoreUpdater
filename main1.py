@@ -28,7 +28,7 @@ while True:
             driver = common.open_cricket_score_page(series, match)
             print(f"Time taken to refresh browser : {(time.time() - x):.2f}sec\n")
         else:
-            time.sleep(2)
+            time.sleep(3)
         start_time = time.time()
         print(f"Attempt : {attempt}")
         teams = common.get_teams_name()

@@ -132,7 +132,7 @@ class Common:
             }
 
     def save_score_to_db(self, payload):
-            return requests.put(self.lambda_db_put_request_url, json=payload)
+            return requests.put(self.lambda_db_put_request_url, json=payload, headers={'ref_id': 'Score_BOT_1'})
 
     def get_partnership(self):
         try:
@@ -203,7 +203,7 @@ class Common:
             'team2_batsmen': [player.to_dict() for player in team2_batsmen],
             'team2_bowlers': [player.to_dict() for player in team2_bowlers]
         }
-        return requests.put(self.lambda_db_detailed_scorecard_put_request_url, json=scorecard)
+        return requests.put(self.lambda_db_detailed_scorecard_put_request_url, json=scorecard, headers={'ref_id': "Score_BOT_2"})
 
     def get_batsmen_player_details(self, xpath):
         players = []
