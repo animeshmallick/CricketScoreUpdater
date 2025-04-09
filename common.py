@@ -188,7 +188,7 @@ class Common:
             pass
         time.sleep(1)
 
-    def open_detailed_scorecard(self, series, match):
+    def get_detailed_scorecard(self, series, match):
         self.driver.get(self.url.format(series, match, 'full-scorecard'))
 
         team2_batsmen = self.get_batsmen_player_details("//div[@class='ds-rounded-lg ds-mt-2'][2]//table[1]//tr[@class='']")
@@ -203,6 +203,9 @@ class Common:
             'team2_batsmen': [player.to_dict() for player in team2_batsmen],
             'team2_bowlers': [player.to_dict() for player in team2_bowlers]
         }
+        return scorecard;
+
+    def save_detailed_scorecard(self, scorecard):
         return requests.put(self.lambda_db_detailed_scorecard_put_request_url, json=scorecard, headers={'ref_id': "Score_BOT_2"})
 
     def get_batsmen_player_details(self, xpath):

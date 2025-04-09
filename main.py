@@ -19,6 +19,8 @@ match = args.match
 
 driver = None
 attempt = 1
+prev_score = {}
+prev_detailed_score = {}
 while True:
     try:
         print(f"Attempt : {attempt}")
@@ -92,11 +94,22 @@ while True:
         payload = common.get_payload_data(series, match, innings * 100 + math.ceil(over), teams, innings, over, match_status,
                                          match_additional_details, team1_score, team2_score, batsmen, bowler,
                                          partnership, last_batsman, last_wicket_at, last_over)
-        response = common.save_score_to_db(payload)
-        print("Save Scorecard : " + ("Success" if response.status_code == 201 else "Failed"))
+        if prev_score !=  payload:
+            response = common.save_score_to_db(payload)
+            if response.status_code == 201:
+                prev_score = payload
+            print("Save Scorecard : " + ("Success" if response.status_code == 201 else "Failed"))
+        else:
+            print("No change in score")
 
-        response = common.open_detailed_scorecard(series, match)
-        print("Save Detailed Scorecard : " + ("Success" if response.status_code == 201 else "Failed"))
+        response = common.get_detailed_scorecard(series, match)
+        if prev_detailed_score != response:
+            response = common.save_detailed_scorecard(response)
+            if response.status_code == 201:
+                prev_detailed_score = response
+            print("Save Detailed Scorecard : " + ("Success" if response.status_code == 201 else "Failed"))
+        else:
+            print("No change in detailed scorecard")
         print("=====================================================================\n")
     except Exception as e:
         print("=====================================================================\n")

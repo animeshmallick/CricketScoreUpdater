@@ -20,6 +20,7 @@ match = args.match
 
 driver = common.open_cricket_score_page(series, match)
 attempt = 1
+prev_score = {}
 while True:
     try:
         if attempt % 10 == 0:
@@ -43,8 +44,13 @@ while True:
 
         payload = common.get_primary_payload_data(series, match, innings, teams, over, match_status,
                                           match_additional_details, team1_score, team2_score)
-        response = common.save_score_to_db(payload)
-        print(f"Main Scorecard Saved in {(time.time() - start_time):.2f}sec with status : " + ("Success" if response.status_code == 201 else "Failed"))
+        if prev_score != payload:
+            response = common.save_score_to_db(payload)
+            if response.status_code == 201:
+                prev_score = payload
+            print(f"Main Scorecard Saved in {(time.time() - start_time):.2f}sec with status : " + ("Success" if response.status_code == 201 else "Failed"))
+        else:
+            print("No change in score")
     except Exception as e:
         print("=====================================================================\n")
         if driver is not None:

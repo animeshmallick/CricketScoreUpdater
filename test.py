@@ -17,4 +17,4 @@ series= args.series
 match = args.match
 
 driver = common.open_cricket_score_page(series, match)
-common.open_detailed_scorecard(series, match)
+common.get_detailed_scorecard(series, match)
