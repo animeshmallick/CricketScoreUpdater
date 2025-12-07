@@ -1,6 +1,7 @@
 import sys
 import argparse
 import math
+import time
 
 from common import Common
 common = Common()
@@ -17,15 +18,20 @@ if not args.match or len(args.match) == 0:
 series= args.series
 match = args.match
 
-driver = None
 attempt = 1
 prev_score = {}
 prev_detailed_score = {}
+driver = common.open_cricket_score_page(series, match)
 while True:
     try:
         print(f"Attempt : {attempt}")
         attempt += 1
-        driver = common.open_cricket_score_page(series, match)
+        if attempt % 20 == 0:
+            print("Refreshing Browser")
+            driver = common.open_cricket_score_page(series, match)
+        else:
+            time.sleep(3)
+
         teams = common.get_teams_name()
         if teams is None:
             raise Exception("Teams not found")
@@ -46,8 +52,9 @@ while True:
         batsmen2 = common.get_batsmen(2)
         bowler1 = common.get_bowler(1)
         bowler2 = common.get_bowler(2)
-        common.open_overs_page(series, match)
-        last_over = common.get_balls_from_over(innings, math.ceil(over))
+        #common.open_overs_page(series, match)
+        #last_over = common.get_balls_from_over(innings, math.ceil(over))
+        last_over = common.get_last_balls()
         team1_score = {
             'runs' :  team1_runs,
             'wickets' : team1_wickets,
@@ -91,9 +98,53 @@ while True:
             }
         }
 
-        payload = common.get_payload_data(series, match, innings * 100 + math.ceil(over), teams, innings, over, match_status,
-                                         match_additional_details, team1_score, team2_score, batsmen, bowler,
-                                         partnership, last_batsman, last_wicket_at, last_over)
+        payload = {
+            "id": f"dummy_series&&{match}",
+            "ballId": int((int(over) * 6) + (over - int(over)) * 10),
+            "batsmen": [
+                {
+                    "name": batsmen1[0],
+                    "runs": 0 if batsmen1[1] is None else int(batsmen1[1]),
+                    "balls": 0 if batsmen1[2] is None else int(batsmen1[2])
+                },
+                {
+                    "name": batsmen2[0],
+                    "runs": 0 if batsmen2[1] is None else int(batsmen2[1]),
+                    "balls": 0 if batsmen2[2] is None else int(batsmen2[2])
+                }
+            ],
+            "bowler": {
+                "name": bowler1[0],
+                "overs": float(bowler1[1]) if bowler1[1] else 0,
+                "runs": int(bowler1[3]) if bowler1[3] else 0,
+                "wickets": int(bowler1[4]) if bowler1[4] else 0
+            },
+            "innings": innings,
+            "lastBalls": last_over,
+            "matchId": match,
+            "message": match_additional_details[0] if len(match_additional_details) > 0 else "",
+            "over": math.ceil(over),
+            "overId": int(innings * 100 + math.ceil(over)),
+            "partnership": partnership,
+            "seriesId": "dummy_series",
+            "source": "dummy_score",
+            "status": "Live" if match_status == "live" else "Completed",
+            "team1": {
+                "name": teams[0],
+                "runs": team1_runs,
+                "wickets": team1_wickets,
+                "overs": team1_over
+            },
+            "team2": {
+                "name": teams[1],
+                "runs": team2_runs,
+                "wickets": team2_wickets,
+                "overs": team2_over
+            }
+        }
+
+
+        print(payload, "\n")
         if prev_score !=  payload:
             response = common.save_score_to_db(payload)
             if response.status_code == 201:
@@ -102,17 +153,18 @@ while True:
         else:
             print("No change in score")
 
-        response = common.get_detailed_scorecard(series, match)
-        if prev_detailed_score != response:
-            response = common.save_detailed_scorecard(response)
-            if response.status_code == 201:
-                prev_detailed_score = response
-            print("Save Detailed Scorecard : " + ("Success" if response.status_code == 201 else "Failed"))
-        else:
-            print("No change in detailed scorecard")
+        # response = common.get_detailed_scorecard(series, match)
+        # if prev_detailed_score != response:
+        #     response = common.save_detailed_scorecard(response)
+        #     if response.status_code == 201:
+        #         prev_detailed_score = response
+        #     print("Save Detailed Scorecard : " + ("Success" if response.status_code == 201 else "Failed"))
+        # else:
+        #     print("No change in detailed scorecard")
         print("=====================================================================\n")
     except Exception as e:
+        print(e)
         print("=====================================================================\n")
-        if driver is not None:
-            driver.close()
+        # if driver is not None:
+        #     driver.close()
 

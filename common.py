@@ -19,13 +19,13 @@ class Common:
         self.balls_details_from_over_xpath = "//div[@class='ds-border ds-border-line']//table//tr[{}]//td[{}]//div[contains(@class,'ds-mb-1.5')]//span"
         self.batsmen_xpath = "//th[text()='Batters']/ancestor::table//tbody[1]//tr[{}]//td"
         self.bowler_xpath = "//th[text()='Batters']/ancestor::table//tbody[2]//tr[{}]//td"
-        self.lambda_db_put_request_url = "https://ablminqly0.execute-api.ap-south-1.amazonaws.com/Prod/save_scorecard"
+        self.save_scorecard_endpoint = "https://api.cricketipl.in/updateScorecard"
         self.lambda_db_detailed_scorecard_put_request_url = "https://ablminqly0.execute-api.ap-south-1.amazonaws.com/Prod/save_detailed_score"
 
     def open_cricket_score_page(self, series, match):
         if self.driver is None:
             options = Options()
-            options.add_argument("--headless")
+            #options.add_argument("--headless")
             options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
             self.driver = webdriver.Chrome(options)
             self.driver.maximize_window()
@@ -132,7 +132,7 @@ class Common:
             }
 
     def save_score_to_db(self, payload):
-            return requests.put(self.lambda_db_put_request_url, json=payload, headers={'ref_id': 'Score_BOT_1'})
+            return requests.post(self.save_scorecard_endpoint, json=payload)
 
     def get_partnership(self):
         try:
@@ -235,4 +235,18 @@ class Common:
             player = Player(player_details.strip(),  isBatsman=False)
             players.append(player)
         return players
+
+    def get_last_balls(self):
+        balls_container = self.driver.find_elements(By.CSS_SELECTOR, "div.ds-bg-fill-content-prime div.ds-mx-4 div.ds-overflow-x-auto span")
+        balls = []
+        for ballDiv in balls_container:
+            if 'st' in ballDiv.text or 'nd' in ballDiv.text or 'rd' in ballDiv.text or 'th' in ballDiv.text or len(ballDiv.text) == 0:
+                pass
+            else:
+                balls.append(ballDiv.text)
+
+            if len(balls) == 12:
+                break
+
+        return balls
 
