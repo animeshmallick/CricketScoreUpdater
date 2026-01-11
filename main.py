@@ -99,7 +99,7 @@ while True:
         }
 
         payload = {
-            "id": f"dummy_series&&{match}",
+            "id": f"{series}&&{match}",
             "ballId": int((int(over) * 6) + (over - int(over)) * 10),
             "batsmen": [
                 {
@@ -126,7 +126,7 @@ while True:
             "over": math.ceil(over),
             "overId": int(innings * 100 + math.ceil(over)),
             "partnership": partnership,
-            "seriesId": "dummy_series",
+            "seriesId": series,
             "source": "dummy_score",
             "status": "Live" if match_status == "live" else "Completed",
             "team1": {
