@@ -17,7 +17,7 @@ class Common:
         self.teams_title = "//div[contains(@class,'ci-team-score')]//a/span"
         self.match_additional_details_xpath = "//div[@class='ds-w-full']//p/span"
         self.balls_details_from_over_xpath = "//div[@class='ds-border ds-border-line']//table//tr[{}]//td[{}]//div[contains(@class,'ds-mb-1.5')]//span"
-        self.batsmen_xpath = "//th[text()='Batters']/ancestor::table//tbody[1]//tr[{}]//td"
+        self.batsmen_xpath = "//span[text()='Batters']/ancestor::table//tbody[1]//tr[{}]//td"
         self.bowler_xpath = "//th[text()='Batters']/ancestor::table//tbody[2]//tr[{}]//td"
         self.save_scorecard_endpoint = "https://api.cricketipl.in/updateScorecard"
         self.lambda_db_detailed_scorecard_put_request_url = "https://ablminqly0.execute-api.ap-south-1.amazonaws.com/Prod/save_detailed_score"
@@ -237,7 +237,7 @@ class Common:
         return players
 
     def get_last_balls(self):
-        balls_container = self.driver.find_elements(By.CSS_SELECTOR, "div.ds-bg-fill-content-prime div.ds-mx-4 div.ds-overflow-x-auto span")
+        balls_container = self.driver.find_elements(By.XPATH, "//div[contains(@class,'ds-flex ds-flex-row ds-w-full ds-overflow-x-auto ds-scrollbar-hide ds-items-center')]//div[contains(@class,'ds-text-title-4')]")
         balls = []
         for ballDiv in balls_container:
             if 'st' in ballDiv.text or 'nd' in ballDiv.text or 'rd' in ballDiv.text or 'th' in ballDiv.text or len(ballDiv.text) == 0:
